@@ -1,0 +1,1109 @@
+---
+title: "Tutorial Week 1"
+author: "Rohit Koonireddy"
+date: "2023-09-23"
+output: html_document
+editor_options: 
+  markdown:  
+    wrap: 75
+---
+
+# Primers
+
+## Introduction
+
+This tutorial gets you started to work with *R* and *Git* for a data
+science project. This chapter also includes some basics for programming in
+R (reading and writing data, types of objects, simple visualizations). If
+you have previous experience with R, you may skip this part.
+
+After you have gone through the lecture and solved the exercises, you
+should be able to:
+
+-   Understand the definition of data science.
+-   Identify the different steps of a data science workflow.
+-   Recall a few typical examples of data science applications toward
+    environmental problems.
+-   Explain what a system is and why system understanding is needed in
+    environmental sciences.
+-   Define data, understand the structure of data, and list examples of
+    environmental data.
+-   List sources of environmental data and explain the methodological
+    difference in their collection.
+-   Execute R and load a dataset for data analyses.
+-   Apply basic Git commands for version control.
+-   Plot data analysis outputs and write them on the disk.
+
+### Key Points from the lecture
+
+The four 'Vs' of *Big Data*:
+
+-   Volume: Data volume is simply the amount of data in a file or database.
+-   Velocity: Data velocity is the lag between time of observation and data
+    ingest for analysis.
+-   Variety: Data variety is the diversity of data in a data collection or
+    problem space.
+-   Veracity: Data veracity is the degree to which data is accurate and
+    precise in comparison with a measured phenomenon
+
+*Open Science* is enabled by the *FAIR* criteria for data use and sharing:
+
+-   **F**indable: Easy to find and well documented.
+-   **A**ccessible: Long term storage and accessible with standard
+    protocols.
+-   **I**nteroperatable: Exchangeable and correctly cited.
+-   **R**eusable: Sufficiently documented and clear legal terms.
+
+Environmental data is collected from a diversity of methods, including
+remote sensing, continuous site-scale measurements (e.g., meteorological
+variables, hydrological variables, ecosystem-atmosphere exchange fluxes of
+water vapour and CO~2~), episodic observations (e.g., forest inventories,
+biodiversity assessments), field campaigns, or experiments in the field or
+under laboratory conditions. Data from these sources come in different
+shapes and formats. In this course, we will learn to handle this diversity
+efficiently to answer research questions that you will likely encounter in
+the future. In many of the exercises, we will focus on data from continuous
+site scale observations, where meteorological variables are measured in
+parallel with ecosystem-atmosphere exchange fluxes of water vapour and
+CO~2~, collected by the eddy covariance technique. In addition, you will
+learn to tap into large environmental data repositories to complement your
+site-scale data.
+
+At the end of each chapter, you will find an exercise that you can complete
+using the [Renku](https://renkulab.io/) cloud computing environment and the
+[RStudio](https://www.rstudio.com/) integrated development environment.
+
+## Tutorial
+
+### Working with RStudio on Renku
+
+Cloud computing is becoming increasingly popular as it allows users to
+connect to the cloud system at any time from almost anywhere. This allows
+the bulk of features and files to be stored on a cloud-hosted server rather
+than on the users own computer. [Renku](https://renkulab.io/) is an open
+cloud computing platform that aims to make 'Multidisciplinary Data Science
+Collaborations' easier to navigate. It stores the data and code allowing
+multiple people to work on the same projects and keeps track of the various
+steps and versions of a project. By keeping track of the changes, there is
+a history and timeline of each persons contributions and results. Through
+Renku, its developers hope to make data science more reproducible, reusable
+and repeatable and hope to encourages and simplify collaborations.
+
+RStudio on Renku is similar to using Rstudio on any laptop or computer,
+except it is hosted by the platform. Follow the [Renku
+tutorial](https://moodle-app2.let.ethz.ch/pluginfile.php/1745301/course/section/164432/renku_tutorial_2023.pdf)
+to learn how to fork a project and start an hosted session to edit it. The
+files edited during a Renku session need to be saved on Renku's Gitlab by
+using Git as explained in the next section. Once your progress has been
+saved, an active session can be closed by clicking on the arrow dots next
+to the connect button back on the Renku main page and by then selecting
+Stop. Do this before logging out of and closing Renku.
+
+![](./figures/renku_stop_session.png)
+
+### Git
+
+*Git* is a program for code version control and managing collaborative code
+development. The basic unit of a Git project is a *repository*, which
+usually contains multiple source code files that may be organised in (sub)
+directories. Git keeps track of the entire history of a repository in steps
+of *commits*. A commit is a "bundle" of multiple edits and additions of new
+files and is specified by the user. Since Git knows the entire history of
+all the files that have ever been added or removed to and from a
+repository, it allows you to recover previous versions of files (previous
+commits) and track changes between them. Git also allows you to have
+multiple versions of your repository (*branches*) for parallel developments
+on the same code base, but we will not use this feature. Since Git stores
+the entire history, the content of a Git repository should always be kept
+light. For example, it is advisable to only add code and other (small, \<10
+MB) plain text files to a repository, but not data, and no other outputs
+that is created by the code of the repository.
+
+A Git repository usually exists locally, that is, on your computer. But the
+power of Git plays out when your local repository has a counterpart in the
+cloud, for example on [GitHub](https://github.com) or on ETH's
+[GitLab](https://gitlab.ethz.ch). Git lets you *push* (upload) your commits
+to your repository's *remote* copy, and *pull* (download) changes that have
+been uploaded by your collaborator(s) or yourself from a different *clone*
+(local copy) of your repository.
+
+Note that for the purpose of this course, Renku will replace your computer,
+which means that the code and the Rstudio interface are run on Renku's
+server. The Git repository managed inside Renku's Rstudio web interface is
+linked to Renku's [Gitlab](https://gitlab.renkulab.io/).
+
+#### Git commands in RStudio
+
+Unless Git has been installed and connected to RStudio, the Git features in
+RStudio will not be visible to a user. We will now introduce you to the
+main commands you will need to make use of Git.
+
+To save your work you will want to commit it. A *commit* saves the current
+version of the file or project you are working on. By continually adding
+commits you will get a timeline of your project as it develops. All commits
+are saved to the *local* repository or Renku session.
+
+To commit, click one of the two commit button or press `Ctr + Alt + M`.
+![](./figures/Renku_Git.jpg)
+
+RStudio will open up a new window, showing changes to the selected file,
+the history and a box where you can add a commit message. The commit
+message is a way to explain what has been changed in the file since the
+last commit. Under the section *Status* each file with either have a yellow
+box with a `?` for 'unkown' files , a blue box containing an `M` for
+'modified' or a green box containing an `A` for 'added'. Added mean the
+file is ready to be commited. The box in the column *Staged* must be ticked
+for the file to be committed. Then click *Commit*.
+
+![](./figures/Renku_Git_Commit_Message.jpg)
+
+If it worked, a message such as the following will appear:
+
+![](./figures/Renku_Git_Commit_successful.jpg)
+
+Remember, this file is still only saved to the *local* repository or Renku
+session. RStudio shows the user this with a little message:
+![](./figures/Renku_Git_pre_Push.jpg)
+
+To upload it to the *remote* repository, we will need to *push* it. To do
+this click either *Push Branch* or *Push* to the right of the green arrows
+facing up. With this command, we upload our changes to the remote Git
+repository, e.g. on GitHub or GitLab. ![](./figures/Renku_Git_Push.jpg)
+
+If the *push* is successful, the little information saying the branch is
+ahead will have disappeared and a message such as the following appears.
+![](./figures/Renku_Git_Push_Message.jpg)
+
+**It is good practice to commit and push any changes before you interrupt
+your work or finish a session,** otherwise those changes will be lost.
+Renku has an autosave function in case you forget but it can lead to
+conflicts when picking up your work again.
+
+Once you start to work again, either stop the previous Renku session in
+which you are working and open a new one; or start the session and click on
+the blue arrow in the Git tab that says `Pull`. As its name suggests, with
+it we can pull changes in our document from the Git repository. This might
+seem like an unnecessary step, when you are working alone on the document.
+However, in projects where you might be working together with a peer and
+need to make sure you integrate her/his changes as well. If you are working
+together, make sure, that you do not work on the same document at the same
+time, which could lead to merge conflicts. If at some point you encounter a
+merge conflict that Git cannot resolve automatically you will have to do so
+manually. However, it is unlikely that you will encounter such a problem in
+this course, which is why we do not explain it here.
+
+### Packages
+
+The tutorials of this course require numerous R packages. Packages provide
+a set of functions and/or other objects targeted for specific applications
+and are not available through *base R*. It will probably not be necessary
+for you to install any package since they are presinstalled in your Renku
+sessions thanks to a [Docker image](https://docs.docker.com/) (Docker will
+not be covered in this course). However, if packages are missing, they can
+be installed by using the following code:
+
+```{r eval=TRUE}
+list_pkgs <- c("ade4") 
+new_pkgs <- list_pkgs[!(list_pkgs %in% installed.packages()[, "Package"])]
+if (length(new_pkgs) > 0) install.packages(new_pkgs)
+library(ade4)
+```
+
+Here, *ade4* is a R package that encompass tools for multivariate data
+analysis. In this package several methods are provided to perform
+ordination on data set ( e.g., principal component analysis, coinertia
+analysis, RLQ analysis...)
+
+### R codes
+
+A single statement can be entered in the R console. For example, to
+calculate the mean of 1, 2, and 3, we enter:
+
+```{r}
+mean(c(1,2,3))
+```
+
+The output of a statement can be saved as a new *object*:
+
+```{r}
+my_new_object <- mean(c(1,2,3))
+```
+
+The value of an object can be accessed or printed by referring to its name:
+
+```{r}
+my_new_object
+```
+
+You will learn more about different types of objects in R further below.
+The set of objects defined during an R session are referred to as the R
+*environment*.
+
+Usually, multiple statements are needed to get, e.g., from reading data
+into R to final numbers and figures that make up a further analysis.
+Together, these multiple statments constitute a *workflow*. It is essential
+that all workflows that underlie results of publications are
+*reproducible*.
+
+After closing an existing R session (e.g. after quitting RStudio), the
+environment defined by the user during that session will not be saved
+automatically and will be lost. To make a workflow reproducible, the
+sequence of statements that you needed to carry out your analysis and
+produce outputs can be saved as an R *code*. Instead of saving the
+environment, we should save the steps (i.e. the code) to reproduce the same
+environment - starting from reading in the (raw) data. This will be the
+objective of an exercise at the end of this session.
+
+An R code is basically a text file, named with the suffix `.R` to indicate
+that it is executable by R. Executing the code is running each statement,
+line-by-line, starting from the top, and can be done in R by:
+
+```{r eval=F}
+source("my_r_code.R")
+```
+
+You can find more useful information about codes and workflows in [R for
+Data Science](https://r4ds.had.co.nz/workflow-scripts.html)
+[@Wickham2017R].
+
+We should always strive to write nice code. Good code is clean, readable,
+consistent, and extensible (easily modified or adapted). To achieve this,
+here are a few points to consider - inspired by [best practices for
+coding](https://www.r-bloggers.com/r-code-best-practices/).
+
+#### Variable naming
+
+It is preferable to use concise and descriptive variable names. Different
+variable naming styles are being used. In this course, we use lowercase
+letters, and underscores (`_`) to separate words within a name (`_`). Avoid
+(`.`) as they are reserved for S3 objects (base R). Also, you should avoid
+naming your objects with names of common functions and variables since your
+re-definition will mask already defined object names.
+
+For example, `df_daily` is a data frame with data at a daily resolution. Or
+`clean_daily` is a function that cleans daily data. Note that a verb is
+used as a name for a function and an underscore (`_`) is used to separate
+words.
+
+It is also recommendable, to avoid variable names consisting of only one
+character. This makes it practically impossible to search for that
+variable.
+
+```{r eval=F}
+# Good
+day_01
+
+# Bad
+DayOne
+day.one
+first_day_of_the_month
+djm1
+
+# Very bad
+mean <- function(x) sum(x)/length(x) # mean() itself is already a function
+T <- FALSE # T is an abbreviation of TRUE
+c <- 10 # c() is used to create a vector (example <- c(1, 2, 3))
+```
+
+#### Comments
+
+Adding comments in the code helps to explain exactly what the code is doing
+and why. This makes it easy to understand and modify the code, and can be
+key when debugging. In R source files, comments are prefixed with a `#`,
+which means that all what is on the right of the `#` is not interpreted by
+R. Avoid unnecessary comments such as:
+
+```{r eval=F}
+## Variable assignation
+myvar <- c(30,25,6,12,14)
+```
+
+```{r eval=F}
+## Mean calculation
+myvar_mean <- mean(myvar)
+myvar_mean 
+```
+
+#### Add spaces and breaks
+
+Adding enough white spaces and line breakes in the right locations greatly
+helps the legibility of any code. Cramping it up too much leads to an
+unintelligible sequence of characters and it will not be clear what parts
+go together (operators, variable names, brackets). Therefore, consider the
+following points:
+
+-   Use spaces around operators (`=`, `+`, `-`, `<-`, `>`, etc.).
+-   Use `<-`, not `=`, for allocating a value to a variable.
+-   Keep the `=` sign for assigning the default parameters in a function.
+-   An opening curly bracket (`{`) should be followed by a line break and
+    never stand alone on a line. A closing curly bracket (`}`) should stand
+    alone on a line unless followed by `else`.
+-   Code inside curly brackets should be *indented* (recommended: two white
+    spaces at the beginning of each line for each indentation level - don't
+    use tabs).
+
+For example, well written code looks like this:
+
+```{r eval=F}
+if (temp > 5.0){
+  growth_temp <- growth_temp + temp  
+}
+```
+
+#### Structure your code
+
+At the beginning of each file add a **header** as a fully commented text
+section, describing what the code contains, and how it fits into the larger
+analysis framework.
+
+Note that Git stores all meta information about the file, including who
+created it, who modified it and when. This information should not be added
+to the header. Then, load all libraries needed within the code. Then,
+source any codes and load data, and only then, start with the sequence of
+statements. To visually separate parts, break up your code using, commented
+lines.
+
+For example, a code could look like this:
+
+```{r eval=FALSE, message=F}
+##////////////////////////////////////////
+## Demonstrating code structure
+##---------------------------------------
+source("R/my_functions.R")
+my_df <- read.csv("data/my_df.csv")
+
+##---------------------------------------
+## Main part
+##---------------------------------------
+## convert units
+my_df$temp <- my_df$temp + 273.15  # deg C -> K
+
+##---------------------------------------
+## Writing output
+##---------------------------------------
+filn <- "data/my_df_kelvin.csv"
+print(paste("Writing file", filn, "..."))
+write_csv(my_df, filn)
+```
+
+### RMarkdown
+
+[RMarkdown](https://rmarkdown.rstudio.com/) files are an enhanced version
+of codes. They combine formatted text and executable code chunks. They can
+either be compiled (*knitted*) into an HTML or PDF output, where code
+chunks are executed upon compilation and visualization outputs are directly
+placed into the output, or they can be run like a code entirely or each
+code chunk separately. When run (not knitted), objects defined by the
+executed code are available in the environment.
+
+Text can be formatted using the [Markdown
+syntax](https://rmarkdown.rstudio.com/authoring_pandoc_markdown.html). For
+example, a top-level section title is specified by `#` and a title of a
+section one level lower by `##`.
+
+RMarkdown documents are the basis of these tutorials.
+
+When opened in RStudio, you can knit an RMarkdown document by clicking the
+"Knit" button:
+
+![](figures/knit.png)
+
+You can run all chunks by selecting clicking "Run All" from the drop-down
+menu available under "Run":
+
+![](figures/run_rmarkdown.png)
+
+Individual chunks can be executed by clicking the green right-pointing
+triangle in the upper right corner of the chunk:
+
+![](figures/rmarkdown_chunk.png)
+
+### Functions
+
+Often, analyses require many steps and your codes may get excessively long.
+Over 2000 lines of code in one file are hard to digest. An important aspect
+of good programming is to avoid duplicating code. If the same sequence of
+multiple statements or functions are to be applied repeatedly to different
+objects, then it is usually advisable to bundle them into a new *function*
+and apply this single function to each object. This also has the advantage
+that if some requirement or variable name changes, it has to be edited only
+in one place. A further advantage of writing functions is that you can give
+the function an intuitively understandable name, so that your code reads
+like a sequence of orders given to a human. For example, the following
+code, converting temperature values provided in Fahrenheit to degrees
+Celsius, could be made into a function.
+
+```{r eval=FALSE}
+## NOT ADVISABLE
+temp_soil <- (temp_soil - 32) * 5 / 9
+temp_air  <- (temp_air  - 32) * 5 / 9
+temp_leaf <- (temp_leaf - 32) * 5 / 9
+```
+
+The same, but using our own function `convert_fahrenheit_to_celsius()`:
+
+```{r eval=FALSE}
+## ADVISABLE
+convert_fahrenheit_to_celsius <- function(temp_f){
+  temp_c <- (temp_f - 32) * 5 / 9
+}
+
+temp_soil <- convert_fahrenheit_to_celsius(temp_soil)
+temp_air  <- convert_fahrenheit_to_celsius(temp_air)
+temp_leaf <- convert_fahrenheit_to_celsius(temp_leaf)
+```
+
+Functions (particularly long ones) can be written to separate source file
+(text files containing executable code).
+
+### Clean data
+
+Similarly as code, data needs to be clean before loading in R. Even if a
+data file (for example an Excel spreadsheet) may look visually appealing,
+its structure determines how easy it is to perform further processing steps
+and calculations on it. We recommended that your data as to be formated as
+follow:
+
+1.  Each column is a variable.
+2.  Each row is an observation.
+3.  Each value has its own cell.
+
+Having data in a such format greatly facilitates all steps of data
+wrangling. When creating a spreadsheet, put variable names in the first
+row, avoid merged cells, create separate tabs for each table, and make it
+*machine readable*. For example, avoid entries like "\>10 g m-2 s-1". A
+cell should only contain one value. Here, this is "10". Create a separate
+column for units, and enter the information there as a character string ("g
+m-2 s-1"). The information conveyed by the greater-than ("\>") symbol
+should be encoded in a machine readable manner. This may not be straight
+forward. A possibility could be to add a column "lower_than" and add the
+entry "TRUE" in the respective cell.
+
+In the exercises at the end of this chapter, you will transform a visually
+appealing but poorly formatted data file into machine readable data.
+
+### R projects
+
+Using R *projects* in combination with Git is the essence of efficient
+workspace management in R. All files that belong together are organised
+within one directory. This can be regarded as the *project directory* and
+is typically congruent with what belongs to the respective Git repository.
+When working in RStudio, you can create a new R project or switch to an
+existing project by navigating the drop-down menu in the top right corner
+of RStudio.
+
+![](figures/new_project.png)
+
+When starting a new project, a file `<project_name.Rproj>` is created. It
+sits in the project directory and stores information about your last
+session (settings, open files, etc.) and optionally (not recommended) the
+*environment* of that session. The use of R projects also automatically
+enables useful features in RStudio for easy package, website, or book
+building and lets you manage Git for the repository corresponding to the
+project.
+
+It's advisable to write files, created by the code of your project, to
+sub-directories within the project directory. For example, keep source
+files where R functions are defined in `./R` (where `.` refers to the
+project directory), data files in `./data` and visualizations in `./fig`.
+To read and write from/to files should be done using relative paths:
+
+```{r eval=F}
+source("./R/my_r_code.R")
+```
+
+or equivalently:
+
+```{r eval=F}
+source("R/my_r_code.R")
+```
+
+A project directory should only contain code and outputs that belong to
+this one project. Stuff that may belong to multiple projects should be kept
+somewhere else. For example, keep original data (e.g., the raw data files
+that you created when collecting the data in the field, or data files you
+downloaded from the web) outside the project directory.
+
+It is advisable to create a separate data directory outside (e.g.,
+`~/data/`) that holds all the original data you ever downloaded, or
+obtained from peers, or gathered yourself. Within such a data directory,
+you can put files from different sources into separate sub-directories and
+add a description file (e.g., `~/data/some_data_source/README`) defining
+who, from where and when the data was obtained and defining data use
+policy.
+
+### Working with data frames
+
+We are going to work with the BDM (biodiversity monitoring) data set of
+Switzerland. BDM is a central project to inform about long-term changes in
+common plant and animal species distribution. By keeping an eye on common
+and widespread species, BDM focuses on trends and developments in
+Switzerland's normal landscape. Inspired by Swiss Range Statistics and the
+Swiss National Forest Inventory, BDM chose a systematic sampling grid
+consisting of three distinct nationwide networks. Along with other
+programs, BDM provides basic data to show how biodiversity in Switzerland
+is developing. BDM's distinctive contribution above all consists in:
+
+-   establishing species lists that are as comprehensive as possible for
+    all sampling areas, increasing the probability of noticing any species
+    absences.
+-   not restricting itself to hotspots or sites where rarities were found,
+    but rather monitoring random sites that would hardly ever be surveyed
+    otherwise.
+-   also surveying common and widespread species that biologists normally
+    ignore.
+-   conducting repeat surveys at the exact same spot using the exact same
+    method, making it possible to gain detailed insights into any changes
+    in species diversity.
+
+Sites of species surveyed by BDM are integrated into the databases of
+InfoSpecies, Switzerland's network of national species data centers.
+Moreover, BDM data are regularly used for scientific analyses. You can
+learn more about the swiss biodiversity monitoring at the BDM website. Now,
+let's get our hands on actual data for demonstrating how data is read and
+written. As most of the code displayed here, the code chunks below are
+executable.
+
+The data is stored as a Comma Separated Values file (`.csv`). This is a
+plain-text, and therefore a non-proprietary format. To follow the FAIR data
+principles, distribute your data in a format that is non-proprietary and
+readable across platforms and applications. For example, avoid distributing
+your data as an *Excel* spreadsheat (`.xlsx`), or a *Matlab* data object
+(`.mat`), or an R data object (`.RData`, or `.rds`).
+
+#### Reading data
+
+To import the data into the R workspace (environment), we use the function
+`read.csv2()`. To tell the function where the data is located, pass the
+data's path as an argument. You can either use an *absolute path*, starting
+from `C:/` on a Windows computer or `~/` on a Mac or Linux. Or,
+alternatively, you can provide a *relative path*, where `./` points to the
+present working directory and `../` is one level up, or `../../` is two
+levels up, etc.
+
+```{r message=FALSE}
+# use a relative path to read the data
+df <- read.csv("data/bird_env_dat_tuto1.csv")
+
+print(df[1:20,]) # to print an overview of the data frame
+```
+
+The file is automatically machine-readable because we have:
+
+-   Only one header row, containing the column (variable) names.
+-   Variables organised by columns, and observations by rows.
+-   Each column consists of a single data type (e.g., character, numeric,
+    logical; see below for more info) - Here, all columns are interpreted
+    as numeric (\`<dbl>').
+-   One value per cell.
+-   No merged cells.
+
+To understand the sort of object we work with, i.e. the *class*, we can do:
+
+```{r}
+class(df)
+```
+
+Fundamentally, `df` is a `data.frame`. In addition, it is also of some
+other classes (`spec_tbl_df","tbl_df", "tbl"`) which gives it additional
+features.
+
+#### Understanding the data structure
+
+There are several base R functions to help you understand the structure of
+a data frame. Here is a non-exhaustive list of of them:
+
+-   Size
+    -   `dim()` - Returns the size of the dimensions of an object (here:
+        number of rows and columns).
+    -   `nrow()` - Returns the number of rows of an object.
+    -   `ncol()` - Returns the number of columns of an object.
+-   Content
+    -   `head()` - Returns the first 6 rows.
+    -   `tail()` - Returns the last 6 rows.
+    -   `View()` - look at the entire data set in the form of a table (It
+        is not supported by the Jupyter environment. In RStudio however, it
+        works).
+-   Names
+    -   `names()` - Returns the column names (for `data.frame`-objects it
+        is synonymous to `colnames()`).
+    -   `rownames()` - Returns the row names.
+-   Summary
+    -   `class()` - Returns the class of an object.
+    -   `str()` - Returns the structure of an object and information about
+        the class, length and content of each column.
+    -   `summary()` - Returns generic statistics information, depending on
+        the class of the object.
+
+For example, the data frame `df` has 472 rows and 15 columns:
+
+```{r}
+dim(df)
+```
+
+A selection of available variables that we will use in subsequent chapters
+are: -`x`: Longitudinal coordinates -`y`: Latitudinal coordinates
+-`whincat`,`ptarmigan`, `dipper`:Bird species Presence absence data (1/0)
+-`elev`: elevation [m] -`prec`: sum of precipitation during the warmest
+quarter (bio18) (Chelsa). [mm] -`temp`: mean annual temperature (Chelsa).
+[°C] -`est.slope`: slope, calculated based on a DEM (digital elevation
+modell). [degrees] -`forest.edge.sum`: sum of all forest edges within 1x1km
+grid cell. Calculated from land cover statistics. [index, from 0-100]
+-`forest.sum`: sum all forest cells within 1x1km grid cell. Calculated from
+land cover statistics (Arealstatistik). [index, from 0-100]
+-`grassland.sum`: sum all grassland cells within 1x1km grid cell.
+Calculated from land cover statistics (Arealstatistik). [index, from 0-100]
+-`water.dist`: distance to the next river or lake [m] -`buidlings.sum`: sum
+of all buildings 1x1km grid cell [index]
+
+#### Selecting data
+
+`df` is a data frame. This is similar to a matrix and has two dimensions
+(rows and columns). If we want to extract specific data from it, we specify
+the indices, i.e. the "coordinates", of the data. For two-dimensional
+objects (data frames, matrices), the first index refers to rows and the
+second to columns. For example, to refer to the element on the third row in
+the first column, we write:
+
+```{r}
+df[3,1]
+```
+
+Reducing a data frame to only the first columns can be done by:
+
+```{r}
+df[1:50, 1]
+```
+
+The method of selecting parts of a data frame by index is quite flexible.
+For example, we may require the information in the third column for the
+first three rows. Putting a colon between two numbers, e.g. `[1:3,]`,
+indicates we want to select the rows numbers starting at the first and
+ending with the second number. So here `[1:3,]` will give us rows one, two
+and three.
+
+```{r}
+df[1:3, 3] # reduces the data frame (tibble) to its first three rows and the 3rd column
+```
+
+To reduce the data frame (tibble) to several columns, the function `c()` is
+used. `c()` stands for concatenate, which means to link together in a
+series or chain. This outputs the data frame (tibble) reduced to the
+selected row or column numbers inside `c()`.
+
+```{r}
+df[1:10, c(2,3,6)]
+```
+
+Another method is to select the columns by column names, i.e. giving as
+input a string vector with the name of each column we want to select
+(again, this is Base R notation). This is especially useful if the columns
+we want to select are not contiguous. For example:
+
+```{r}
+# Selecting data by name in base R  ================================
+df[1:10,c("x", "y", "whinchat")]
+```
+
+#### Renaming
+
+temp, prec or elev as variable names may be hard to remember and in this
+section you will have to type them a lot. Therefore we change their names
+to something more intelligle.
+
+```{r}
+colnames(df)
+colnames(df)[7:9] <- c("Elevation","Precipitation","Temperature")
+
+```
+
+#### Writing data
+
+A data frame can be written to a CSV file by:
+
+```{r eval = F}
+write.csv(df[,c("x", "y", "whinchat","Elevation","Precipitation","Temperature")], file = "data/df_whinchat.csv")
+```
+
+The function `saveRDS()` allows you save individual objects of any form
+(not just a data frame). `saveRDS()` creates a binary file that is fast to
+write and read, but only intelligible to R. Such files are commonly
+identified by the suffix `.rds`. It is recommended to name the `.rds` files
+according to the single object they contain. For example:
+
+```{r eval=F}
+saveRDS(df[,c("x", "y","Elevation","Precipitation","Temperature")], file = "data/Env_variables.rds")
+```
+
+This file can then be read into the R workspace. Sometimes, it is useful to
+give it a new name, e.g.:
+
+```{r eval=F}
+temp_sum <- readRDS("data/Env_variables.rds")
+```
+
+Note that making a file publicly available as a `.rds` file violates the
+FAIR principles. It is not *interoperable*. Therefore, whenever possible,
+save your data in a format that is readable across platforms without
+requiring proprietary software. Hence use `write_csv()` whenever possible.
+
+### R objects
+
+Each object in R is of a certain *class*, specifying some attributes and
+how functions act upon it. The most basic classes are:
+
+-   `numeric`. any number (except complex numbers) -\> 2.375
+-   `integer` (int) - integer numbers -\> 2
+-   `character` (chr) - any string -\> "fluxes"
+-   `logical` (logi) - boolean -\> TRUE FALSE
+-   `factor` (Factor) - categorical data, the variable can only be one of a
+    defined amount of options -\> female/male/other
+-   `function` (function) - a set of statements organized to perform a
+    specific task -\> sum()
+
+#### Data frames
+
+We have learned that the object `df` is a data frame. That is, it is of
+class `"data.frame"`. You can think of a data frame as a table. Columns
+need to be of the same length and all values in a column need to be of the
+same data type.
+
+#### Vectors and classes
+
+The contents of a data frame column is a *vector* and can be extracted and
+stored. Next, we are going to extract the values of the column `temp` and
+return the class of the entries in this vector.
+
+```{r}
+df_Onesp <- df[,c("x", "y", "whinchat","Elevation","Precipitation","Temperature")]
+Temp <- df_Onesp$Temperature
+```
+
+Sometimes you need to convert a numeric number into a *character*.
+
+```{r}
+as.character(as.integer(Temp))
+```
+
+Note that in R, a line break has no effect.
+
+An object of class **logical** can only be `TRUE` or `FALSE`. If I ask
+which `temperatures > 10` for example, R will return a vector of class
+logical.
+
+```{r}
+Temp > 10
+```
+
+Indeed, the first 5 temperature values are all below 10.
+
+#### Lists
+
+Lists are extremely flexible. They allow us to store different types of
+data, even if they are of different lengths. Here is an example where each
+element of the list is named.
+
+```{r}
+mylist <- list(
+    temperatures = c(20, 13, 18, 14), 
+    my_favourite_function = mean, 
+    best_course = "Environmental Systems Data Science"
+    )
+```
+
+Similar to data frames, we can extract elements from lists, either by index
+`[[1]]` or by the name `[["temperatures"]]`. Note the double `[[]]` here,
+indicating an element of a list as opposed to `[]` indicating an element of
+a vector. To get the entire vector of temperatures, do either of the two:
+
+```{r}
+mylist[[1]]
+mylist[["temperatures"]]
+```
+
+And to get the first temperature value:
+
+```{r}
+mylist[["temperatures"]][1]
+```
+
+You can also append elements to the list (either way is possible):
+
+```{r}
+mylist[["my_second_favourite_function"]] <- median
+mylist$my_second_favourite_function <- median
+```
+
+**Checkpoint**
+
+In *mylist*, we have saved a function called `my_favourite_function` and a
+numeric vector called `temperatures`. Use the function stored in the list
+and apply it on the vector temperatures, stored in the same list. Add the
+result in the list as a new variable and call it `mean_temperature`. The
+mean temperature should be equal to 16.25.
+
+**Solution**
+
+```{r}
+mylist$mean_temperature <- mylist[["my_favourite_function"]](mylist[["temperatures"]])
+mylist$mean_temperature
+```
+
+This was a very condensed introduction to vectors and lists. A more
+complete introduction is given [here](https://r4ds.had.co.nz/vectors.html).
+
+### Data visualisation
+
+Visualising data is an integral part of any data science workflow. In this
+section, we introduce just the very basics. Our data frame `df_Onesp`
+contains several variables, one of which is `x`. In other words, we are
+dealing with spatial data. Let's look at the temporal course of temperature
+along the longitude as a line plot (`type = "l"`).
+
+```{r}
+Data2plot <- df_Onesp[,c("x","y","Temperature")]
+Data2plot <- na.omit(Data2plot)
+```
+
+As the df_Onesp data frame contained NA values we applied the na.omit
+function that delete the lines with NA.
+
+```{r}
+plot(y=Data2plot$Temperature,x=Data2plot$x, type = "l") 
+```
+
+Another useful way of looking, not at a temporal course, but rather at the
+distribution of your data, is to display a histogram. A histogram
+visualises the frequency or proportion of data that has a metric value that
+falls within a certain interval known as a 'bin'. Below you will see the
+temperature on the x-axis split into these 'bins' ranging across 1°C. The
+number of times a data point falls between say 4°C to 5°C is then tallied
+and displayed as the frequency on the y-axis.
+
+```{r}
+hist(Data2plot$Temperature, breaks= seq(4,24,1), xlab = "Temperature (°C)")
+```
+
+Plots can be saved as files, as long as the file size does not get too
+large. It will write vector graphics as outputs, i.e. PDF. In base-R, this
+can be done by:
+
+```{r eval=F}
+pdf("./figures/filename.pdf")
+hist(df_small$temp)
+dev.off()
+```
+
+**Checkpoint**
+
+Create a scatter-plot (points) of temperature versus the elevation using
+all data points in `df`. Can this plot intuitively be interpreted?
+
+**Solution**
+
+```{r}
+plot(df$Elevation,df$Temperature,xlab="Elevation",ylab="Temperature")
+```
+
+### Conditionals
+
+In cases where certain statements are executed or not, depending on a
+criterion, we can use conditional statements `if`, `else if`, and `else`.
+Conditionals are an essential feature of programming and available in all
+languages. The R syntax for conditionals looks like this:
+
+```{r eval=FALSE}
+if (Temp[1] > 15){
+  is_hot <- TRUE
+} else {
+  is_hot <- FALSE
+}
+
+is_hot
+```
+
+The evaluation of the criterion (here `(temp > 15)`) has to return either
+`TRUE` or `FALSE`.
+
+### Loops
+
+Loops are another essential essential feature of programming. `for` and
+`while` loops exist in probably all programming languages. We introduce
+them here because they provide an essential and powerful functionality for
+solving many common tasks. You will encounter them later again (see Chapter
+\@ref(ch-05).
+
+`for` and `while` loops let us repeatedly execute the same set of commands,
+while changing an index, or counter variable to take a sequence of
+different values. The following example calculates a temperature sum of the
+first ten values, by iteratively adding them together. Of course, this is
+equivalent to just using the `sum()` function.
+
+```{r}
+temp_sum <- 0
+for (i in 1:5){
+  temp_sum <- temp_sum + df_Onesp$Temperature[i]
+}
+print(temp_sum)
+
+print(sum(df_Onesp$Temperature[1:5]))
+```
+
+Instead of directly telling R how many iterations it should do we can also
+define a condition. As long as the condition is TRUE, R will continue
+iterating. As soon as it is FALSE, R stops the loop. The following lines of
+code do the same operation as the for loop we just wrote. What's different?
+What is the same?
+
+```{r}
+i = 1
+temp_sum <- 0
+while (i <=20){
+  temp_sum <- temp_sum + Data2plot$Temperature[i]
+  i = i+1
+}
+
+temp_sum ==sum(Data2plot$Temperature[1:20])
+```
+
+### Where to find help
+
+The material covered in this course will give you a solid basis for your
+future projects. Even more so, it provides you with code examples that you
+can adapt to your own purposes. Naturally, you will face problems we did
+not cover in the course and you will need to learn more as you go. The good
+news is, you do not have to. Many people make their code available online
+and often others have faced similar problems. Modifying existing code might
+make it easier for you to get started.
+
+#### Within R
+
+"*I know the name of a function that might help solve the problem but I do
+not know how to use it.*" Typing a `?` in front of the function will open
+the documentation of the function, giving lots of information on the uses
+and options a function has. You have learned a few things about plots but
+you may not know how to make a boxplot:
+
+```{r eval =F}
+?boxplot
+```
+
+Running the above code will open the information on making boxplots in R.
+
+If you do know how a function works but need to be reminded of the
+arguments it takes, simply type:
+
+```{r eval =F}
+args(boxplot)
+```
+
+"*There must be a function that does task X but I do not know which one.*"
+Typing `??` will call the function `help.search()`. Maybe you want to save
+a plot as a JPEG but you do not know how:
+
+```{r eval =F}
+??jpeg
+```
+
+Note that it only looks through your *installed* packages.
+
+#### Online
+
+To search in the entire library of R go to the website
+[rdocumentation.org](https://www.rdocumentation.org/) or turn to a search
+engine of your choice. It will send you to the appropriate function
+documentation or a helpful forum where someone has already asked a similar
+question. Most of the time you will end up on
+[stackoverflow.com](https://stackoverflow.com/), a forum where most
+questions have already been answered.
+
+#### Error messages
+
+If you do not understand the error message, start by searching the web. Be
+aware, that this is not always useful as developers rely on the error
+catching provided by R. To be more specific add the name of the function
+and package you are using, to get a more detailed answer.
+
+#### Asking for help
+
+If you cannot find a solution online, start by asking your friends and
+colleagues. Someone with more experience than you might be able and willing
+to help you. When asking for help it is important to think about how you
+state the problem. The key to receiving help is to make it as easy as
+possible to understand the issue your facing. Try to reduce what does not
+work to a simple example. Reproduce a problem with a simple data frame
+instead of one with thousands of rows. Generalize it in a way that people
+who do not do research in your field can understand the problem. If you are
+asking a question online in a forum include the output of `sessionInfo()`
+(it provides information about the R version, packages your using,...) and
+other information that can be helpful to understand the problem.
+stackoverflow.com has its own guidelines on how to ask a good question,
+which you should follow. If your question is well crafted and has not been
+answered before you can sometimes get an answer within 5 minutes.
+<https://stackoverflow.com/help/how-to-ask>
+
+Finally, many packages have a mailing list or allow you to open a query on
+the code repository, where you can ask specific questions. The same is true
+for R itself. The R-Help mailing list
+<https://stat.ethz.ch/mailman/listinfo/r-help> is read by many people.
+However, the tone of such mailing lists can be pretty dry and unwelcoming
+to new users. Be sure to use the right terminology or else you might get an
+answer pointing out your misuse of language instead of your problem. Also,
+be sure your question is valid. Or else you won't get an answer.
+
+### Key points from the tutorial
+
+*RStudio on Renku and Git commands*: - Regularly commit any changes you
+make to your work. To do this tick the *Stage* box, add a commit message
+and press commit. - Then upload the changes to the remote repository by
+*pushing* it. - Remember to close any active environments when you have
+finished your work on Renku.
+
+*R codes*: - Comments are any code prefixed by at least one hashtag (`#`)
+will not be interpreted by R. - Comments should help you understand your
+code. - Add spaces around operators and breaks to make code easier to
+read. - Use `<-`, not `=`, for allocating a value to a variable. - Begin
+files with a header to describe what the code contains and does. - Load all
+the libraries needed in the code at the beginning.
+
+*Functions*: - Use functions to simplify a code with many steps or for
+duplicated code sections. - Functions (particularly long ones) can be
+written to separate source file (text files containing executable code).
+
+*Formatting data* follows these rules: 1. Each column is a variable. 2.
+Each row is an observation. 3. Each value has its own cell.
+
+*Working with data frames*: - To get an idea of the structure of a data
+frame use functions such as: 1. Size: `dim()`, `nrow()`, `ncol()` 2.
+Content: `head()`, `tail()`, `view()` 3. Names: `names()`, `rownames()` 4.
+Summary: `class()`, `str()`, `summary()`
+
+-   *Selecting data*: Data frames consist of rows and columns. To extract
+    information either use `df[row(s), column(s)]`.
+
+-   *Vectors and classes*: The simplest data structure in R is a vector and
+    can be numeric or character vectors.
+
+-   *Lists*: Lists allow data of different types to be stored. To extract
+    elements use double brackets `[[]]`.
+
+-   *Data visualisation*: Visualising data can provide a unique way to see
+    and understand the data.
+
+-   *Loops*: Loops (such as `for` and `while`) are another essential
+    essential feature of programming and lets us repeatedly execute the
+    same set of commands.
+
+*Where to find help*: First, look within R (e.g. `?ncol`), then use the
+internet or ask colleagues. Remember to include `sessionInfo()` to help
+others to understand the version of R and packages you are using.
+
+### Further reading
+
+A complete tutorial on using R for Data Science in general is the freely
+available online-book by [Grolemund & Wickham](https://r4ds.had.co.nz/).
+The material covered in this tutorial should serve as a "primer". That is,
+its purpose is to get you started with R and Git and make sure you know the
+basics. If you feel that you are still missing some basic concepts of R, a
+good starting point to fill up your gaps is the [Chapter *Workflow: basics*
+in Grolemund & Wickham](https://r4ds.had.co.nz/workflow-basics.html).
