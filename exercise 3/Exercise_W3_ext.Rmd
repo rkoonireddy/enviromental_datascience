@@ -1,0 +1,228 @@
+---
+title: "Ex3_extension"
+author: "Rohit Koonireddy"
+date: "2023-10-09"
+output: html_document
+---
+# Temperature anomaly data
+```{r}
+require(lubridate)
+require(tidyverse)
+require(ncdf4)
+require(viridis)
+require(raster)
+require(rworldmap)
+require(EFDR)
+library(RColorBrewer)
+```
+
+Import the global temperature anomaly data in **HadCRUT.4.6.0.0.median.nc**. What variables, dimensions and attributes are present in this dataset?
+
+```{r}
+# Open the nc file and dump to look at the summary
+# Import the data as in the tutorial
+nc_data = nc_open('./data/HadCRUT.4.6.0.0.median.nc') # Open the file to read the netcdf data
+print(nc_data) # Runs an "nc dump" to show a summary of the file
+
+lon <- ncvar_get(nc_data, "longitude")
+print(paste0("longitudes:"))
+head(lon) # show the start of the lon data vector
+
+print(paste0("latitudes:"))
+lat <- ncvar_get(nc_data, "latitude", verbose = F)
+head(lat) # show the start of the lat data vector
+
+print(paste0("months:"))
+time_values <- ncvar_get(nc_data, "time")
+head(time_values) # show the start of the time data vector
+
+print(paste0("dimensions for temperature: lon, lat, time"))
+tem <- ncvar_get(nc_data, "temperature_anomaly")
+dim(tem) # temperature has dimensions of lon,lat,month
+```
+
+* Extract lon, lat, time and temperature anomaly as well as the fill value
+
+* Use the attributes on the time variable to convert it to a timestamp (Hint: What does the time represent?)
+
+* Replace filled temperature anomaly data with NaNs 
+
+* Combine the selected data into a list
+
+```{r}
+# Extract and clean the required data
+fillvalue2 = NA
+fillvalue1 <- -1.00000001504747e+30
+
+nc_close(nc_data) # We have the data so we can close the netcdf file
+print("number of fillvalues")
+sum(tem == fillvalue1) # See how many missing values there are
+tem[tem == fillvalue1] = NaN
+print("number of NA values")
+sum(tem == fillvalue2)
+tem[tem == fillvalue2] = NaN
+
+#correct time stamps
+correct_time_to_months <- function(time_values){
+    # Round the time values to the nearest integer
+    rounded_time_values <- round(time_values)
+    
+    # Define the reference date as POSIXct object
+    reference_date <- as.POSIXct("1961-01-01 00:00:00", tz = "UTC")
+    
+    # Create an empty vector to store the timestamps
+    times <- vector("list", length(time_values))
+    
+    # Loop through each time value and convert it into a timestamp
+    for (i in 1:length(rounded_time_values)) {
+      timestamp <- reference_date + days(rounded_time_values[i])
+      times[[i]]<-timestamp
+    }
+    
+    # Print the list of timestamps
+   # print(times)
+    times <- array(unlist(times), dim = length(times))
+    return(times)
+}
+
+correct_times_properly<- function(input_array){
+  new_values <- (input_array - 15.5) / 30 + 0.5
+  return(new_values)
+}
+
+time_values <- correct_time_to_months(time_values)
+abs_tem <- list(lat=lat,lon=lon,tem=tem,time=time_values)
+
+
+#Disretize the latitudes data using buckets ranging between -90 and +90 with bucket size of 30.
+lat_cutoffs <- c(-90,-60,-30,0,30,60,90)
+
+# Preallocate an array for the results; dimensions = time (month), latitude band, mean/std
+mean_tem_latbands <- array(dim=c(12,length(lat_cutoffs)-1,2))
+
+# Discretize latitude
+abs_tem$lat_band <- abs_tem$tem*NaN # space for discretized lat band, same size as tem 
+for (n in 1:(length(lat_cutoffs)-1)){ # Loop through the lat bands
+  # Find lats corresponding to this band
+  tmp = abs_tem$lat > lat_cutoffs[n] & abs_tem$lat <= lat_cutoffs[n+1]
+  # Give a number to each band
+  abs_tem$lat_band[,tmp,] <- n 
+}
+
+# Monthly mean for each band
+for (n in 1:12){
+  # convert tem data and lat band labels to vector so we can use aggregate
+  labels <- as.vector(abs_tem$lat_band[,,n]) 
+  data <- as.vector(abs_tem$tem[,,n])
+  mean_tem_latbands[n,,1] <- aggregate(data, list(labels), FUN=mean)$x
+  mean_tem_latbands[n,,2] <- aggregate(data, list(labels), FUN=sd)$x
+}
+
+
+# Look at the results: mean and std are printed as separate tables, with dimensions of month * lat band
+mean_tem_latbands
+```
+```{r}
+time_values
+```
+
+```{r}
+abs_df <- create_df_from_lists(abs_tem)
+abs_df
+time_values
+```
+
+```{r}
+create_df_from_lists <- function(clean_input){
+  lon_vec = rep(clean_input$lon,length(abs_tem$lat))
+  lat_vec = rep(clean_input$lat,each=length(abs_tem$lon))
+  tem_array = correct_times_properly(clean_input$tem[,,1])
+  print(tem_array)
+  tem_vec = as.vector(tem_array) # Regrid the January slice
+  df = data.frame(x=lat_vec,y=lon_vec,z=tem_vec)
+  return(df)
+}
+
+abs_df <- create_df_from_lists(abs_tem)
+
+regrid_wrapper <- function(input,n1,n2,idp,nmax,plotresults=TRUE,method="idw",original_list,month_number){
+  # Function body
+  input_regrid = regrid(
+    input,
+    n1 = n1,
+    n2 = n2,
+    method = method,
+    idp = idp,
+    nmax = nmax)
+  if (plotresults){
+    par(mar=c(2,4,1,1)) # set plotting margins
+    par(mfrow=c(2,1)) # Create subplots
+    input_regrid_list <- create_lists_from_df(input_regrid)
+    input_list <- create_lists_from_df(input)
+    #plot original data
+    plot_map(lon=original_list$lon,lat=original_list$lat,data=original_list$tem[,,month_number],title=paste0("Original: Mean January temperature"))
+    plot_map(lon=input_list$lon,lat=input_list$lat,data=input_regrid_list$tem,title=paste0("Original: Mean January temperature with nmax ",nmax," and idp",idp))
+    }
+  #return(input_regrid)
+}
+
+regrid_wrapper(input = abs_df,n1=150,n2=150,idp=1,nmax=1,plotresults=TRUE,method="idw",original_list= abs_tem,month_number=1)
+```
+
+
+# Correlations between temperature anomaly and other variables
+
+Look at the dimensions of our two datasets (mean temperature and temperature anomaly. If regridding is required to compare the two datasets, regrid the mean temperature data.
+
+```{r}
+# Regrid if needed
+
+```
+
+We will consider correlations between temperature anomaly in June and December 2015 and the variables longitude, latitude, absolute latitude, and mean temperature. 
+
+* Select these slices and plot scatterplots between the four variables (longitude, latitude, absolute latitude, mean temperature) and the temperature anomalies for June and December 2015. 
+
+* Use 4 x 2 subplots for this, so that all comparisons are included in one figure. 
+
+* Normalise the data to between 0 and 1 before analysing, so that slopes are comparible between different variables. 
+
+* Include the linear fit as a line on the scatter plot. 
+
+* Save the slopes and p-values for the linear fits as well as the Pearson correlation coefficients.
+
+```{r}
+# Carry out the comparisons between temperature anomaly and the desired variables.
+
+```
+
+What patterns can you see in the data you have plotted?
+
+* Which variable has the largest slope for the relationship with temperature anomaly? Which slope has the highest significance (lowest p)?
+
+*Result* 
+
+* Which variable has the closest relationship to temperature anomaly (highest Pearson correlation coefficient)?
+
+*Result*
+
+* Looking at the shapes of the curves, are there other transformations or processing approaches you would apply to the data to further investigate relationships?
+
+*Result*
+
+* Can you see evidence for rapid Arctic warming in your plots? See https://eos.org/science-updates/understanding-causes-and-effects-of-rapid-warming-in-the-arctic for more information.
+
+*Result*
+
+# Summary
+
+In this exercise you have learnt:
+
+* How to import and investigate .nc data
+
+* Regridding and smoothing geographical data
+
+* Using a wrapper function to streamline feeding data in and out of another function
+
+* Investigating linear correlations between different parameters
+
